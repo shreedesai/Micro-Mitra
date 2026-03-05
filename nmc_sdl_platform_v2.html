@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NMC CompetencyAI — Medical Education Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ── Reset & Base ────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --teal:#0D9488;--teal-light:#F0FDFA;--teal-border:#99F6E4;
+  --amber:#D97706;--amber-light:#FFFBEB;--amber-border:#FDE68A;
+  --violet:#7C3AED;--violet-light:#F5F3FF;--violet-border:#DDD6FE;
+  --red:#DC2626;--red-light:#FFF1F2;--red-border:#FECACA;
+  --green:#059669;--green-light:#ECFDF5;--green-border:#A7F3D0;
+  --blue:#1D4ED8;--blue-light:#EFF6FF;--blue-border:#BFDBFE;
+  --bg:#FFFFFF;--surface:#F8FAFC;--card:#FFFFFF;
+  --border:#E2E8F0;--border2:#F1F5F9;
+  --text:#0F172A;--text2:#334155;--text3:#64748B;--text4:#94A3B8;
+  --shadow:0 1px 4px rgba(0,0,0,.07);--shadow2:0 4px 20px rgba(0,0,0,.1);
+  --radius:12px;--radius-sm:8px;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:#fff;color:var(--text);font-size:14px;line-height:1.5;}
+button{font-family:inherit;cursor:pointer;}
+select,input,textarea{font-family:inherit;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:4px;}
+
+/* ── Layout ──────────────────────────────────────────────── */
+#app{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+/* ── Topnav ──────────────────────────────────────────────── */
+#topnav{
+  display:flex;align-items:center;gap:16px;
+  padding:12px 28px;background:#fff;
+  border-bottom:1px solid var(--border);
+  box-shadow:var(--shadow);flex-shrink:0;z-index:50;
+}
+.logo-box{
+  width:42px;height:42px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--teal),#0891B2);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.logo-text{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px;}
+.logo-sub{font-size:9px;color:var(--text4);font-family:'DM Mono',monospace;letter-spacing:.5px;font-weight:500;}
+.nav-tabs{display:flex;gap:4px;margin-left:24px;}
+.nav-tab{
+  padding:7px 16px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:#fff;
+  color:var(--text3);font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:6px;transition:all .18s;
+}
+.nav-tab:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-light);}
+.nav-tab.active{border-color:var(--teal);color:var(--teal);background:var(--teal-light);font-weight:600;}
+.domain-badges{display:flex;gap:8px;margin-left:auto;align-items:center;}
+.domain-badge{
+  padding:3px 10px;border-radius:20px;font-size:10px;
+  font-family:'DM Mono',monospace;font-weight:600;
+}
+.avatar{
+  width:34px;height:34px;border-radius:50%;margin-left:6px;
+  background:linear-gradient(135deg,#4F46E5,#7C3AED);
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  box-shadow:0 2px 8px rgba(79,70,229,.3);flex-shrink:0;
+}
+
+/* ── Main content ────────────────────────────────────────── */
+#main{flex:1;overflow:auto;background:#fff;}
+.page{display:none;padding:26px 30px;}
+.page.active{display:block;}
+
+/* ── Cards ───────────────────────────────────────────────── */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);}
+.card-title{font-size:11px;color:var(--text4);font-family:'DM Mono',monospace;font-weight:600;margin-bottom:14px;letter-spacing:.3px;}
+
+/* ── KPI Grid ────────────────────────────────────────────── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.kpi-card{border-radius:var(--radius);padding:18px;border:1px solid;border-top-width:3px;box-shadow:var(--shadow);}
+.kpi-inner{display:flex;justify-content:space-between;align-items:flex-start;}
+.kpi-label{font-size:10px;font-family:'DM Mono',monospace;font-weight:600;margin-bottom:6px;color:var(--text4);}
+.kpi-value{font-size:28px;font-weight:700;}
+.kpi-sub{font-size:11px;color:var(--text4);margin-top:2px;}
+.kpi-icon{font-size:26px;}
+
+/* ── Chart Grid ──────────────────────────────────────────── */
+.chart-grid-2{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px;}
+.chart-grid-eq{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn{
+  padding:9px 22px;border-radius:var(--radius-sm);border:none;
+  font-size:13px;font-weight:600;font-family:inherit;
+  transition:all .18s;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+}
+.btn:hover{opacity:.88;transform:translateY(-1px);}
+.btn:disabled{opacity:.45;cursor:default;transform:none;}
+.btn-teal{background:linear-gradient(135deg,var(--teal),#0891B2);color:#fff;}
+.btn-amber{background:linear-gradient(135deg,var(--amber),#B45309);color:#fff;}
+.btn-violet{background:linear-gradient(135deg,var(--violet),#A78BFA);color:#fff;}
+.btn-outline{background:#fff;border:1px solid var(--border);color:var(--text3);}
+.btn-outline-teal{background:#fff;border:1px solid var(--teal);color:var(--teal);}
+.btn-outline-amber{background:#fff;border:1px solid var(--amber);color:var(--amber);}
+
+/* ── Inputs ──────────────────────────────────────────────── */
+.input{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text);padding:9px 13px;font-size:13px;outline:none;
+  transition:border-color .15s;font-family:inherit;
+}
+.input:focus{border-color:var(--teal);}
+textarea.input{resize:vertical;line-height:1.7;}
+
+/* ── Badge ───────────────────────────────────────────────── */
+.badge{
+  display:inline-block;padding:3px 9px;border-radius:10px;
+  font-size:11px;font-weight:600;
+}
+
+/* ── Fade/Pulse animations ───────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.fade-up{animation:fadeUp .35s ease;}
+.shimmer{
+  background:linear-gradient(90deg,#F1F5F9 25%,#E2E8F0 50%,#F1F5F9 75%);
+  background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:8px;
+}
+.pulse-dot{animation:pulse 2s infinite;}
+
+/* ── Progress bar ────────────────────────────────────────── */
+.progress-bar-bg{height:6px;background:var(--border2);border-radius:3px;overflow:hidden;}
+.progress-bar-fill{height:100%;border-radius:3px;transition:width .6s ease;}
+
+/* ── Sub-nav ─────────────────────────────────────────────── */
+.sub-nav{display:flex;gap:8px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:16px;}
+.sub-tab{
+  padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);
+  background:#fff;color:var(--text3);font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:6px;transition:all .18s;
+}
+.sub-tab:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-light);}
+.sub-tab.active{border-color:var(--teal);color:var(--teal);background:var(--teal-light);font-weight:600;}
+
+/* ── Table ───────────────────────────────────────────────── */
+.table-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);}
+.table-header{
+  display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 80px;
+  padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);
+  font-size:11px;color:var(--text4);font-family:'DM Mono',monospace;font-weight:600;
+}
+.table-row{
+  display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 80px;
+  padding:12px 16px;border-bottom:1px solid var(--border2);align-items:center;
+  cursor:pointer;transition:background .15s;
+}
+.table-row:hover{background:var(--surface);}
+.table-row:last-child{border-bottom:none;}
+.table-row-alt{background:#FAFAFA;}
+.table-row-alt:hover{background:var(--surface);}
+
+/* ── Modal ───────────────────────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);
+  z-index:200;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal-box{
+  background:#fff;border:1px solid var(--border);border-radius:16px;
+  padding:28px;width:560px;max-height:85vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.15);animation:fadeUp .3s ease;
+}
+
+/* ── Student SDL Layout ──────────────────────────────────── */
+#student-page{
+  display:none;height:calc(100vh - 68px);overflow:hidden;
+  flex-direction:row;
+}
+#student-page.active{display:flex;}
+#student-sidebar{
+  width:200px;flex-shrink:0;border-right:1px solid var(--border);
+  padding:14px 10px;display:flex;flex-direction:column;gap:4px;
+  background:var(--surface);overflow-y:auto;
+}
+.std-tab{
+  width:100%;padding:9px 12px;text-align:left;border-radius:var(--radius-sm);
+  border:1px solid transparent;background:transparent;
+  color:var(--text3);font-size:12px;font-weight:500;
+  display:flex;align-items:center;gap:7px;transition:all .18s;
+}
+.std-tab:hover{border-color:var(--border);background:#fff;color:var(--teal);}
+.std-tab.active{border-color:var(--teal);background:var(--teal-light);color:var(--teal);font-weight:600;}
+.context-box{
+  margin-top:auto;padding:12px;background:#fff;border-radius:10px;
+  border:1px solid var(--border);box-shadow:var(--shadow);
+}
+.ctx-label{font-size:9px;color:var(--text4);font-family:'DM Mono',monospace;font-weight:600;margin-bottom:10px;letter-spacing:.3px;}
+.ctx-field-label{font-size:10px;color:var(--text3);font-weight:500;margin-bottom:4px;}
+.ctx-select{width:100%;padding:5px 7px;font-size:11px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text);outline:none;}
+
+#student-content{flex:1;overflow-y:auto;padding:24px 28px;background:#fff;}
+.std-panel{display:none;}
+.std-panel.active{display:block;animation:fadeUp .3s ease;}
+
+/* ── Chat ────────────────────────────────────────────────── */
+#student-page.active #chat-panel{display:flex;flex-direction:column;height:calc(100vh - 200px);}
+.chat-messages{
+  flex:1;overflow-y:auto;background:var(--surface);
+  border-radius:var(--radius);border:1px solid var(--border);
+  padding:16px;margin-bottom:10px;
+}
+.chat-msg{display:flex;margin-bottom:12px;}
+.chat-msg.user{justify-content:flex-end;}
+.chat-bubble{
+  max-width:76%;padding:10px 14px;border-radius:12px;
+  font-size:13px;line-height:1.7;white-space:pre-wrap;
+}
+.chat-bubble.bot{
+  background:#fff;border:1px solid var(--border);
+  border-radius:12px 12px 12px 4px;color:var(--text2);
+  box-shadow:var(--shadow);
+}
+.chat-bubble.user-msg{
+  background:linear-gradient(135deg,#EFF6FF,#DBEAFE);
+  border:1px solid #BFDBFE;border-radius:12px 12px 4px 12px;color:#1D4ED8;
+}
+.bot-avatar{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;margin-right:8px;
+  background:linear-gradient(135deg,var(--teal),#0891B2);
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+}
+.chat-suggestions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px;}
+.chat-suggestion{
+  padding:4px 10px;background:#fff;border:1px solid var(--border);
+  border-radius:20px;color:var(--text3);font-size:11px;cursor:pointer;
+  transition:all .15s;font-family:inherit;
+}
+.chat-suggestion:hover{border-color:var(--teal);color:var(--teal);}
+.chat-input-row{display:flex;gap:9px;}
+
+/* ── Activity feed ───────────────────────────────────────── */
+.activity-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.activity-item{
+  display:flex;gap:10px;padding:11px 13px;background:var(--surface);
+  border-radius:var(--radius-sm);border:1px solid var(--border);align-items:flex-start;
+}
+.activity-text{font-size:12px;color:var(--text2);line-height:1.5;}
+.activity-time{font-size:10px;color:var(--text4);margin-top:2px;font-family:'DM Mono',monospace;}
+
+/* ── At-risk card ────────────────────────────────────────── */
+.at-risk-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.at-risk-card{
+  background:#fff;border:1px solid var(--red-border);border-left:4px solid var(--red);
+  border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);
+}
+
+/* ── Roadmap week card ────────────────────────────────────── */
+.roadmap-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.week-card{border-radius:var(--radius);padding:16px;border:1px solid;border-top-width:3px;box-shadow:var(--shadow);}
+
+/* ── Quiz ────────────────────────────────────────────────── */
+.quiz-q{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px;margin-bottom:12px;box-shadow:var(--shadow);
+}
+.quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px;}
+.quiz-option{
+  padding:9px 12px;background:var(--surface);border:1px solid var(--border);
+  border-radius:7px;cursor:pointer;font-size:12px;color:var(--text2);
+  display:flex;gap:7px;transition:all .15s;font-family:inherit;text-align:left;
+}
+.quiz-option:hover{border-color:var(--teal);background:var(--teal-light);}
+.quiz-option.selected{background:#EFF6FF;border-color:#3B82F6;color:#1D4ED8;}
+.quiz-option.correct{background:var(--teal-light);border-color:var(--teal);color:var(--teal);}
+.quiz-option.wrong{background:var(--red-light);border-color:var(--red);color:var(--red);}
+.quiz-key{font-family:'DM Mono',monospace;font-weight:700;}
+
+/* ── Sample reflection ───────────────────────────────────── */
+.sample-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.sample-item{
+  padding:10px 13px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);font-size:11px;color:var(--text3);
+  cursor:pointer;line-height:1.5;transition:all .15s;
+}
+.sample-item:hover{border-color:var(--teal);background:var(--teal-light);}
+
+/* ── Analysis result ─────────────────────────────────────── */
+.analysis-wrap{margin-top:20px;animation:fadeUp .35s ease;}
+.analysis-domain-bar{margin-bottom:11px;}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+.meta-card{border-radius:10px;padding:13px;text-align:center;}
+.meta-card-label{font-size:10px;color:var(--text4);font-family:'DM Mono',monospace;font-weight:600;margin-bottom:5px;}
+.meta-card-value{font-size:14px;font-weight:700;}
+.gap-strength-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.gap-item, .strength-item{font-size:12px;color:var(--text2);margin-bottom:4px;padding-left:8px;}
+
+/* ── Settings ────────────────────────────────────────────── */
+.settings-group{margin-bottom:20px;}
+.settings-group-label{font-size:11px;color:var(--text4);font-family:'DM Mono',monospace;font-weight:600;margin-bottom:10px;letter-spacing:.3px;}
+.settings-list{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);}
+.settings-row{display:flex;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border2);align-items:center;}
+.settings-row:last-child{border-bottom:none;}
+.settings-key{font-size:13px;color:var(--text2);}
+.settings-val{font-size:12px;color:var(--teal);font-family:'DM Mono',monospace;font-weight:600;}
+
+/* ── Dashboard top performers ─────────────────────────────── */
+.top-performer-row{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
+.rank-badge{
+  width:24px;height:24px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;
+}
+
+/* ── Emotional tone ─────────────────────────────────────── */
+.emotion-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.emotion-card{padding:10px 14px;border-radius:10px;border:1px solid;text-align:center;}
+.emotion-emoji{font-size:20px;margin-bottom:2px;}
+.emotion-count{font-size:14px;font-weight:700;}
+.emotion-label{font-size:10px;color:var(--text4);}
+
+/* ── Responsive helpers ──────────────────────────────────── */
+.live-badge{
+  font-size:11px;color:var(--teal);font-family:'DM Mono',monospace;
+  background:var(--teal-light);border:1px solid var(--teal-border);
+  padding:7px 14px;border-radius:var(--radius-sm);font-weight:600;
+}
+
+/* ── Notification banner ─────────────────────────────────── */
+.alert-banner{
+  border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;
+  display:flex;gap:12px;align-items:center;
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ═══════════════════════════════════════════════════════ TOP NAV -->
+<nav id="topnav">
+  <div class="logo-box">⚕</div>
+  <div>
+    <div class="logo-text">NMC CompetencyAI</div>
+    <div class="logo-sub">COMPETENCY-BASED MEDICAL EDUCATION · BATCH 2023</div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('dashboard')">📊 Dashboard</button>
+    <button class="nav-tab" onclick="showPage('student')">🎓 Student SDL</button>
+    <button class="nav-tab" onclick="showPage('admin')">🛡️ Admin Panel</button>
+  </div>
+  <div class="domain-badges">
+    <span class="domain-badge" style="background:#F0FDFA;color:#0D9488;border:1px solid #99F6E4;">📚 Knowledge</span>
+    <span class="domain-badge" style="background:#FFFBEB;color:#D97706;border:1px solid #FDE68A;">⚕️ Skills</span>
+    <span class="domain-badge" style="background:#F5F3FF;color:#7C3AED;border:1px solid #DDD6FE;">🤝 Attitude</span>
+    <div class="avatar">👤</div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════ MAIN -->
+<div id="main">
+
+<!-- ══════════════════════════════════════════ DASHBOARD PAGE -->
+<div id="dashboard-page" class="page active">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+    <div>
+      <h2 style="font-size:24px;font-weight:700;color:var(--text);margin-bottom:4px;">Class Dashboard</h2>
+      <p style="font-size:13px;color:var(--text4);">MBBS Batch 2023 · NMC Competency Overview</p>
+    </div>
+    <div class="live-badge">● LIVE · <span id="live-date"></span></div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi-card" style="background:var(--teal-light);border-color:var(--teal-border);border-top-color:var(--teal);">
+      <div class="kpi-inner">
+        <div>
+          <div class="kpi-label">TOTAL STUDENTS</div>
+          <div class="kpi-value" style="color:var(--teal);">8</div>
+          <div class="kpi-sub">Active learners</div>
+        </div>
+        <span class="kpi-icon">👥</span>
+      </div>
+    </div>
+    <div class="kpi-card" style="background:var(--teal-light);border-color:var(--teal-border);border-top-color:var(--teal);">
+      <div class="kpi-inner">
+        <div>
+          <div class="kpi-label">AVG SDL READINESS</div>
+          <div class="kpi-value" style="color:var(--teal);">66%</div>
+          <div class="kpi-sub">Class average</div>
+        </div>
+        <span class="kpi-icon">📈</span>
+      </div>
+    </div>
+    <div class="kpi-card" style="background:var(--amber-light);border-color:var(--amber-border);border-top-color:var(--amber);">
+      <div class="kpi-inner">
+        <div>
+          <div class="kpi-label">AT-RISK STUDENTS</div>
+          <div class="kpi-value" style="color:var(--red);">2</div>
+          <div class="kpi-sub">SDL &lt; 50%</div>
+        </div>
+        <span class="kpi-icon">⚠️</span>
+      </div>
+    </div>
+    <div class="kpi-card" style="background:var(--violet-light);border-color:var(--violet-border);border-top-color:var(--violet);">
+      <div class="kpi-inner">
+        <div>
+          <div class="kpi-label">TOTAL REFLECTIONS</div>
+          <div class="kpi-value" style="color:var(--violet);">39</div>
+          <div class="kpi-sub">This semester</div>
+        </div>
+        <span class="kpi-icon">📝</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 1 -->
+  <div class="chart-grid-2">
+    <div class="card">
+      <div class="card-title">DOMAIN PROGRESS TREND (4 WEEKS)</div>
+      <canvas id="trendChart" height="160"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">MILLER'S PYRAMID RADAR</div>
+      <canvas id="radarChart" height="160"></canvas>
+    </div>
+  </div>
+
+  <!-- Charts Row 2 -->
+  <div class="chart-grid-eq">
+    <div class="card">
+      <div class="card-title">AVG SDL BY SUBJECT</div>
+      <canvas id="subjectChart" height="140"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">TOP PERFORMERS</div>
+      <div id="top-performers"></div>
+    </div>
+  </div>
+
+  <!-- Activity Feed -->
+  <div class="card">
+    <div class="card-title">RECENT ACTIVITY FEED</div>
+    <div class="activity-grid">
+      <div class="activity-item"><span style="font-size:16px;">📝</span><div><div class="activity-text">Ananya Nair submitted reflection #10 in Medicine</div><div class="activity-time">2m ago</div></div></div>
+      <div class="activity-item"><span style="font-size:16px;">⚠️</span><div><div class="activity-text">Karan Patel SDL dropped below threshold in Pharmacology</div><div class="activity-time">15m ago</div></div></div>
+      <div class="activity-item"><span style="font-size:16px;">🏆</span><div><div class="activity-text">Sneha Iyer completed 4-week roadmap in Pathology</div><div class="activity-time">1h ago</div></div></div>
+      <div class="activity-item"><span style="font-size:16px;">❓</span><div><div class="activity-text">Rohit Verma scored 42% on Attitude quiz</div><div class="activity-time">2h ago</div></div></div>
+      <div class="activity-item"><span style="font-size:16px;">💬</span><div><div class="activity-text">Priya Sharma used AI tutor for 35 minutes</div><div class="activity-time">3h ago</div></div></div>
+      <div class="activity-item"><span style="font-size:16px;">📊</span><div><div class="activity-text">Weekly class report generated by admin</div><div class="activity-time">1d ago</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ STUDENT PAGE -->
+<div id="student-page" class="page" style="display:none;height:calc(100vh - 68px);overflow:hidden;flex-direction:row;">
+  <!-- Sidebar -->
+  <div id="student-sidebar">
+    <button class="std-tab active" onclick="showStudentPanel('reflect',this)">🔍 Reflect &amp; Analyze</button>
+    <button class="std-tab" onclick="showStudentPanel('roadmap',this)">🗺️ Study Roadmap</button>
+    <button class="std-tab" onclick="showStudentPanel('quiz',this)">❓ Adaptive Quiz</button>
+    <button class="std-tab" onclick="showStudentPanel('tutor',this)">🤖 AI Tutor</button>
+    <div class="context-box">
+      <div class="ctx-label">CONTEXT</div>
+      <div style="margin-bottom:8px;">
+        <div class="ctx-field-label">Subject</div>
+        <select id="subject-select" class="ctx-select">
+          <option>Anatomy</option><option>Physiology</option><option>Biochemistry</option>
+          <option>Pathology</option><option>Pharmacology</option><option>Medicine</option>
+          <option>Surgery</option><option>OBG</option><option>Pediatrics</option><option>PSM</option>
+        </select>
+      </div>
+      <div>
+        <div class="ctx-field-label">Miller's Level</div>
+        <select id="level-select" class="ctx-select">
+          <option>Knows</option><option selected>Knows How</option>
+          <option>Shows How</option><option>Does</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div id="student-content">
+
+    <!-- REFLECT PANEL -->
+    <div id="reflect-panel" class="std-panel active">
+      <h2 style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;">Learning Reflection Analysis</h2>
+      <p style="font-size:13px;color:var(--text4);margin-bottom:18px;">Write your reflection to receive AI-powered domain analysis</p>
+      <div class="sample-grid">
+        <div class="sample-item" onclick="setSample(0)"><span style="color:var(--teal);margin-right:5px;">✦</span>I attended the dissection lab today but couldn't identify the brachial plexus correctly...</div>
+        <div class="sample-item" onclick="setSample(1)"><span style="color:var(--teal);margin-right:5px;">✦</span>During ward rounds, I felt nervous speaking to patients. I knew the diagnosis but...</div>
+        <div class="sample-item" onclick="setSample(2)"><span style="color:var(--teal);margin-right:5px;">✦</span>I memorized the drug interactions but when presented with a real case, I hesitated...</div>
+      </div>
+      <textarea id="reflection-input" class="input" rows="6" style="width:100%;margin-bottom:12px;" placeholder="Write your learning reflection here..."></textarea>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;">
+        <button class="btn btn-teal" id="analyze-btn" onclick="analyzeReflection()">🔍 Analyze Reflection</button>
+        <button class="btn btn-outline-amber" onclick="generateQuiz()">❓ Generate Quiz</button>
+      </div>
+      <div id="analysis-loading" style="display:none;margin-top:16px;">
+        <div class="shimmer" style="height:54px;margin-bottom:8px;"></div>
+        <div class="shimmer" style="height:54px;margin-bottom:8px;"></div>
+        <div class="shimmer" style="height:54px;"></div>
+      </div>
+      <div id="analysis-result" class="analysis-wrap" style="display:none;"></div>
+    </div>
+
+    <!-- ROADMAP PANEL -->
+    <div id="roadmap-panel" class="std-panel">
+      <h2 style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;">Personalized Study Roadmap</h2>
+      <p style="font-size:13px;color:var(--text4);margin-bottom:18px;">Your AI-generated adaptive learning journey</p>
+      <div id="roadmap-empty" style="text-align:center;padding:60px 20px;color:var(--text4);">
+        <div style="font-size:44px;margin-bottom:14px;">🗺️</div>
+        <p style="font-size:15px;margin-bottom:18px;color:var(--text3);">Analyze a reflection first to generate your roadmap</p>
+        <button class="btn btn-outline-teal" onclick="showStudentPanel('reflect',null)">Go to Reflection →</button>
+      </div>
+      <div id="roadmap-content" style="display:none;"></div>
+      <div id="roadmap-loading" style="display:none;">
+        <div class="shimmer" style="height:60px;margin-bottom:10px;"></div>
+        <div class="shimmer" style="height:160px;margin-bottom:10px;"></div>
+        <div class="shimmer" style="height:160px;"></div>
+      </div>
+    </div>
+
+    <!-- QUIZ PANEL -->
+    <div id="quiz-panel" class="std-panel">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;">
+        <div>
+          <h2 style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;">Adaptive Quiz</h2>
+          <p style="font-size:13px;color:var(--text4);" id="quiz-subtitle">Miller's Level: Knows How</p>
+        </div>
+        <button class="btn btn-amber" onclick="generateQuiz()">New Quiz</button>
+      </div>
+      <div id="quiz-empty" style="text-align:center;padding:60px 20px;color:var(--text4);">
+        <div style="font-size:44px;margin-bottom:14px;">❓</div>
+        <button class="btn btn-amber" onclick="generateQuiz()">Start Quiz →</button>
+      </div>
+      <div id="quiz-loading" style="display:none;">
+        <div class="shimmer" style="height:120px;margin-bottom:10px;"></div>
+        <div class="shimmer" style="height:120px;margin-bottom:10px;"></div>
+        <div class="shimmer" style="height:120px;"></div>
+      </div>
+      <div id="quiz-content" style="display:none;"></div>
+      <div id="quiz-submit-row" style="display:none;margin-top:14px;">
+        <button class="btn btn-teal" onclick="submitQuiz()">Submit Quiz</button>
+      </div>
+      <div id="quiz-score" style="display:none;"></div>
+    </div>
+
+    <!-- TUTOR PANEL -->
+    <div id="tutor-panel" class="std-panel">
+      <h2 style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;">AI Tutor</h2>
+      <p style="font-size:13px;color:var(--text4);margin-bottom:14px;">24/7 personalized tutoring for NMC competency-based learning</p>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-suggestions">
+        <button class="chat-suggestion" onclick="setChatInput('Explain this concept simply')">Explain this concept simply</button>
+        <button class="chat-suggestion" onclick="setChatInput('Create a mnemonic for me')">Create a mnemonic</button>
+        <button class="chat-suggestion" onclick="setChatInput('Give me a clinical scenario')">Clinical scenario</button>
+        <button class="chat-suggestion" onclick="setChatInput('What are common exam mistakes?')">Exam mistakes</button>
+      </div>
+      <div class="chat-input-row">
+        <input id="chat-input" class="input" style="flex:1;" placeholder="Ask about your subject... (Enter to send)" onkeydown="if(event.key==='Enter')sendChat()"/>
+        <button class="btn btn-teal" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+
+  </div><!-- /student-content -->
+</div><!-- /student-page -->
+
+<!-- ══════════════════════════════════════════ ADMIN PAGE -->
+<div id="admin-page" class="page" style="display:none;">
+  <div style="margin-bottom:22px;">
+    <h2 style="font-size:24px;font-weight:700;color:var(--text);margin-bottom:4px;">Admin Panel</h2>
+    <p style="font-size:13px;color:var(--text4);">Faculty &amp; coordinator view · Student management · Class analytics</p>
+  </div>
+
+  <div class="sub-nav">
+    <button class="sub-tab active" onclick="showAdminTab('students',this)">👥 Student Records</button>
+    <button class="sub-tab" onclick="showAdminTab('atrisk',this)">⚠️ At-Risk (2)</button>
+    <button class="sub-tab" onclick="showAdminTab('insights',this)">🧠 Class Insights</button>
+    <button class="sub-tab" onclick="showAdminTab('settings',this)">⚙️ Settings</button>
+  </div>
+
+  <!-- STUDENTS TAB -->
+  <div id="admin-students" class="fade-up">
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+      <input id="student-search" class="input" style="flex:1;min-width:180px;" placeholder="Search student or roll no..." oninput="renderStudentTable()"/>
+      <select id="filter-domain" class="input" onchange="renderStudentTable()">
+        <option value="all">All Domains</option>
+        <option value="knowledge">Knowledge</option>
+        <option value="skill">Skill</option>
+        <option value="attitude">Attitude</option>
+      </select>
+      <select id="filter-subject" class="input" onchange="renderStudentTable()">
+        <option value="all">All Subjects</option>
+        <option>Anatomy</option><option>Physiology</option><option>Biochemistry</option>
+        <option>Pathology</option><option>Pharmacology</option><option>Medicine</option>
+        <option>Surgery</option><option>OBG</option><option>Pediatrics</option><option>PSM</option>
+      </select>
+      <select id="sort-by" class="input" onchange="renderStudentTable()">
+        <option value="sdl">Sort: SDL %</option>
+        <option value="quiz">Sort: Quiz Avg</option>
+        <option value="name">Sort: Name</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <div class="table-header">
+        <span>STUDENT</span><span>SUBJECT</span><span>DOMAIN</span>
+        <span>LEVEL</span><span>SDL %</span><span>QUIZ AVG</span><span>ACTION</span>
+      </div>
+      <div id="student-table-body"></div>
+    </div>
+  </div>
+
+  <!-- AT-RISK TAB -->
+  <div id="admin-atrisk" style="display:none;" class="fade-up">
+    <div class="alert-banner" style="background:#FFF7ED;border:1px solid #FED7AA;">
+      <span style="font-size:28px;">⚠️</span>
+      <div>
+        <div style="font-size:16px;color:#9A3412;font-weight:700;margin-bottom:2px;">2 Students Require Immediate Attention</div>
+        <div style="font-size:13px;color:#C2410C;">SDL Readiness below 50% — these students may need targeted faculty intervention</div>
+      </div>
+    </div>
+    <div class="at-risk-grid" id="at-risk-cards"></div>
+  </div>
+
+  <!-- INSIGHTS TAB -->
+  <div id="admin-insights" style="display:none;" class="fade-up">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <div class="card">
+        <div class="card-title">DOMAIN DISTRIBUTION</div>
+        <canvas id="domainPieChart" height="180"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">SDL READINESS BY STUDENT</div>
+        <canvas id="sdlBarChart" height="180"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">MILLER'S PYRAMID DISTRIBUTION</div>
+        <canvas id="pyramidChart" height="160"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">EMOTIONAL TONE SNAPSHOT</div>
+        <div class="emotion-grid" id="emotion-grid"></div>
+      </div>
+    </div>
+    <div class="card" style="border-color:var(--violet-border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-size:13px;color:var(--violet);font-family:'DM Mono',monospace;font-weight:600;">🧠 AI-GENERATED CLASS INSIGHT</div>
+        <button class="btn btn-violet" onclick="generateClassInsight()">Generate Insight</button>
+      </div>
+      <div id="insight-loading" style="display:none;" class="shimmer" style="height:80px;"></div>
+      <div id="insight-result" style="font-size:14px;color:var(--text2);line-height:1.8;font-style:italic;">
+        <span style="color:var(--text4);">Click "Generate Insight" to get AI-powered class-level analysis</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div id="admin-settings" style="display:none;max-width:600px;" class="fade-up">
+    <div class="settings-group">
+      <div class="settings-group-label">COMPETENCY FRAMEWORK</div>
+      <div class="settings-list">
+        <div class="settings-row"><span class="settings-key">Assessment model</span><span class="settings-val">NMC CBE 2019 + Miller's Pyramid</span></div>
+        <div class="settings-row"><span class="settings-key">Domain weights (K:S:A)</span><span class="settings-val">40% : 35% : 25%</span></div>
+        <div class="settings-row"><span class="settings-key">SDL threshold for alert</span><span class="settings-val">&lt; 50%</span></div>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-label">AI CONFIGURATION</div>
+      <div class="settings-list">
+        <div class="settings-row"><span class="settings-key">Model</span><span class="settings-val">Claude Sonnet 4</span></div>
+        <div class="settings-row"><span class="settings-key">Reflection analysis</span><span class="settings-val">Enabled</span></div>
+        <div class="settings-row"><span class="settings-key">24/7 Tutor</span><span class="settings-val">Enabled</span></div>
+        <div class="settings-row"><span class="settings-key">Auto-roadmap generation</span><span class="settings-val">On reflection submit</span></div>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-label">NOTIFICATIONS</div>
+      <div class="settings-list">
+        <div class="settings-row"><span class="settings-key">At-risk alerts</span><span class="settings-val">Email + Dashboard</span></div>
+        <div class="settings-row"><span class="settings-key">Weekly class digest</span><span class="settings-val">Every Monday 7AM</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /admin-page -->
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ═══════════════════════════════════════════ STUDENT MODAL -->
+<div class="modal-overlay" id="student-modal" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
+      <div>
+        <h3 id="modal-name" style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;"></h3>
+        <div id="modal-roll" style="font-size:12px;color:var(--text4);font-family:'DM Mono',monospace;"></div>
+      </div>
+      <button onclick="closeModal()" style="background:none;border:none;font-size:22px;color:var(--text4);cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════ DATA
+const STUDENTS = [
+  {id:1,name:"Arjun Mehta",    roll:"2023MBBS001",subject:"Anatomy",      domain:"skill",     level:"Knows How", sdl:62,gaps:["Brachial plexus","Upper limb muscles"],         reflections:4, quizAvg:58,trend:[45,52,58,62],emotional:"anxious"},
+  {id:2,name:"Priya Sharma",   roll:"2023MBBS002",subject:"Physiology",   domain:"knowledge", level:"Knows",     sdl:78,gaps:["Cardiac cycle","Renal physiology"],              reflections:6, quizAvg:74,trend:[60,66,70,74],emotional:"motivated"},
+  {id:3,name:"Rohit Verma",    roll:"2023MBBS003",subject:"Biochemistry", domain:"attitude",  level:"Shows How", sdl:45,gaps:["Patient communication","Empathy in breaking bad news"],reflections:2,quizAvg:42,trend:[38,40,42,42],emotional:"frustrated"},
+  {id:4,name:"Sneha Iyer",     roll:"2023MBBS004",subject:"Pathology",    domain:"knowledge", level:"Knows How", sdl:85,gaps:["Tumour markers","Haematopathology"],             reflections:8, quizAvg:82,trend:[70,74,79,82],emotional:"confident"},
+  {id:5,name:"Karan Patel",    roll:"2023MBBS005",subject:"Pharmacology", domain:"skill",     level:"Knows",     sdl:38,gaps:["Drug prescribing","Dose calculations"],          reflections:1, quizAvg:35,trend:[30,32,35,35],emotional:"confused"},
+  {id:6,name:"Ananya Nair",    roll:"2023MBBS006",subject:"Medicine",     domain:"skill",     level:"Does",      sdl:91,gaps:["ECG interpretation"],                            reflections:10,quizAvg:88,trend:[78,82,85,88],emotional:"confident"},
+  {id:7,name:"Vikram Singh",   roll:"2023MBBS007",subject:"Surgery",      domain:"attitude",  level:"Shows How", sdl:55,gaps:["Surgical communication","Consent process"],     reflections:3, quizAvg:50,trend:[40,44,48,50],emotional:"anxious"},
+  {id:8,name:"Meera Krishnan", roll:"2023MBBS008",subject:"OBG",          domain:"knowledge", level:"Knows How", sdl:70,gaps:["Obstetric emergencies","Fetal monitoring"],     reflections:5, quizAvg:68,trend:[55,60,64,68],emotional:"motivated"},
+];
+const SAMPLES = [
+  "I attended the dissection lab today but couldn't identify the brachial plexus correctly. I understand the theory but get confused during practical application.",
+  "During ward rounds, I felt nervous speaking to patients. I knew the diagnosis but couldn't explain it clearly to the family members.",
+  "I memorized the drug interactions but when presented with a real case, I hesitated on prescribing. Need more practice with clinical scenarios."
+];
+const domainColor  = d=>({knowledge:"#0D9488",skill:"#D97706",attitude:"#7C3AED"}[d]||"#94A3B8");
+const levelColor   = l=>({Knows:"#94A3B8","Knows How":"#D97706","Shows How":"#0D9488",Does:"#059669"}[l]||"#94A3B8");
+const emotionColor = e=>({confident:"#0D9488",motivated:"#059669",anxious:"#D97706",frustrated:"#DC2626",confused:"#7C3AED"}[e]||"#94A3B8");
+const emotionEmoji = e=>({confident:"😊",motivated:"💪",anxious:"😰",frustrated:"😤",confused:"😕"}[e]||"");
+const sdlColor     = v=>v>=70?"#0D9488":v>=50?"#D97706":"#DC2626";
+let analysisData = null;
+let quizQuestions = [];
+let quizAnswers = {};
+let quizSubmitted = false;
+let chatHistory = [{role:"assistant",content:"Hello! I'm your AI tutor for NMC competency-based learning. Ask me anything about your subject, request a study plan, or share a learning challenge. How can I help you today?"}];
+
+// ═══════════════════════════════════ PAGE NAVIGATION
+function showPage(id){
+  ['dashboard','student','admin'].forEach(p=>{
+    const el = document.getElementById(p+'-page');
+    if(el){
+      if(p==='student'){ el.style.display = id===p?'flex':'none'; }
+      else { el.style.display = id===p?'block':'none'; }
+    }
+  });
+  document.querySelectorAll('.nav-tab').forEach((b,i)=>{
+    b.classList.toggle('active',['dashboard','student','admin'][i]===id);
+  });
+  if(id==='admin') initAdminCharts();
+  if(id==='student') initTutorChat();
+}
+function showAdminTab(id, btn){
+  ['students','atrisk','insights','settings'].forEach(t=>{
+    const el=document.getElementById('admin-'+t);
+    if(el) el.style.display=t===id?'block':'none';
+  });
+  document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(id==='insights') setTimeout(()=>initInsightsCharts(),50);
+}
+function showStudentPanel(id, btn){
+  document.querySelectorAll('.std-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.std-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id+'-panel').classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id==='quiz'){ document.getElementById('quiz-subtitle').textContent='Miller\'s Level: '+document.getElementById('level-select').value; }
+}
+
+// ═══════════════════════════════════ LIVE DATE
+document.getElementById('live-date').textContent = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+
+// ═══════════════════════════════════ DASHBOARD CHARTS
+function initDashboardCharts(){
+  // Trend
+  new Chart(document.getElementById('trendChart'),{
+    type:'line',
+    data:{
+      labels:['Week 1','Week 2','Week 3','Week 4'],
+      datasets:[
+        {label:'Knowledge',data:[58,62,67,70],borderColor:'#0D9488',backgroundColor:'rgba(13,148,136,.08)',tension:.4,pointRadius:4,borderWidth:2,fill:true},
+        {label:'Skill',    data:[45,50,55,57],borderColor:'#D97706',backgroundColor:'rgba(215,119,6,.06)',tension:.4,pointRadius:4,borderWidth:2,fill:true},
+        {label:'Attitude', data:[40,44,47,50],borderColor:'#7C3AED',backgroundColor:'rgba(124,58,237,.06)',tension:.4,pointRadius:4,borderWidth:2,fill:true},
+      ]
+    },
+    options:{responsive:true,plugins:{legend:{labels:{font:{family:'DM Sans',size:12},color:'#64748B'}}},scales:{x:{grid:{display:false},ticks:{color:'#94A3B8',font:{family:'DM Mono'}}},y:{grid:{color:'#F1F5F9'},ticks:{color:'#94A3B8',font:{family:'DM Mono'}},domain:[30,100]}}}
+  });
+  // Radar
+  new Chart(document.getElementById('radarChart'),{
+    type:'radar',
+    data:{
+      labels:['Knows','Knows How','Shows How','Does'],
+      datasets:[{label:'Students',data:[25,50,50,25],backgroundColor:'rgba(13,148,136,.15)',borderColor:'#0D9488',borderWidth:2,pointBackgroundColor:'#0D9488'}]
+    },
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{r:{grid:{color:'#E2E8F0'},pointLabels:{font:{family:'DM Sans',size:11},color:'#64748B'},ticks:{display:false}}}}
+  });
+  // Subject SDL
+  new Chart(document.getElementById('subjectChart'),{
+    type:'bar',
+    data:{
+      labels:['Anat','Physio','Biochem','Path','Pharma','Med','Surg','OBG'],
+      datasets:[{data:[62,78,45,85,38,91,55,70],backgroundColor:STUDENTS.map(s=>sdlColor(s.sdl)),borderRadius:4}]
+    },
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#94A3B8',font:{family:'DM Mono',size:10}}},y:{grid:{color:'#F1F5F9'},ticks:{color:'#94A3B8',font:{family:'DM Mono',size:10}},max:100}}}
+  });
+  // Top performers
+  const top = [...STUDENTS].sort((a,b)=>b.sdl-a.sdl).slice(0,4);
+  const rankBg=['linear-gradient(135deg,#F59E0B,#D97706)','linear-gradient(135deg,#94A3B8,#64748B)','linear-gradient(135deg,#B45309,#92400E)','linear-gradient(135deg,#CBD5E1,#94A3B8)'];
+  document.getElementById('top-performers').innerHTML = top.map((s,i)=>`
+    <div class="top-performer-row">
+      <div class="rank-badge" style="background:${rankBg[i]}">${i+1}</div>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-size:13px;font-weight:500;color:var(--text);">${s.name}</span>
+          <span style="font-size:13px;font-weight:700;color:var(--teal);font-family:'DM Mono',monospace;">${s.sdl}%</span>
+        </div>
+        <div class="progress-bar-bg" style="margin-top:4px;"><div class="progress-bar-fill" style="width:${s.sdl}%;background:var(--teal);"></div></div>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════ ADMIN: STUDENT TABLE
+function renderStudentTable(){
+  const q=(document.getElementById('student-search').value||'').toLowerCase();
+  const fd=document.getElementById('filter-domain').value;
+  const fs=document.getElementById('filter-subject').value;
+  const sb=document.getElementById('sort-by').value;
+  let data=[...STUDENTS]
+    .filter(s=>fd==='all'||s.domain===fd)
+    .filter(s=>fs==='all'||s.subject===fs)
+    .filter(s=>s.name.toLowerCase().includes(q)||s.roll.includes(q))
+    .sort((a,b)=>sb==='sdl'?b.sdl-a.sdl:sb==='quiz'?b.quizAvg-a.quizAvg:a.name.localeCompare(b.name));
+  document.getElementById('student-table-body').innerHTML = data.map((s,i)=>`
+    <div class="table-row ${i%2===1?'table-row-alt':''}" onclick="openStudentModal(${s.id})">
+      <div>
+        <div style="font-size:14px;font-weight:500;color:var(--text);">${s.name}</div>
+        <div style="font-size:11px;color:var(--text4);font-family:'DM Mono',monospace;">${s.roll}</div>
+      </div>
+      <div style="font-size:13px;color:var(--text3);">${s.subject}</div>
+      <div><span class="badge" style="color:${domainColor(s.domain)};background:${domainColor(s.domain)}18;">${s.domain.toUpperCase()}</span></div>
+      <div><span class="badge" style="color:${levelColor(s.level)};background:${levelColor(s.level)}18;">${s.level}</span></div>
+      <div>
+        <div class="progress-bar-bg" style="width:80px;margin-bottom:3px;"><div class="progress-bar-fill" style="width:${s.sdl}%;background:${sdlColor(s.sdl)};"></div></div>
+        <span style="font-size:12px;font-weight:600;color:${sdlColor(s.sdl)};font-family:'DM Mono',monospace;">${s.sdl}%</span>
+      </div>
+      <div style="font-size:13px;color:var(--text3);font-family:'DM Mono',monospace;">${s.quizAvg}%</div>
+      <div>
+        <button onclick="event.stopPropagation();openStudentModal(${s.id})" style="font-size:11px;color:var(--teal);padding:4px 10px;border:1px solid #0D948844;border-radius:6px;background:var(--teal-light);font-weight:500;cursor:pointer;font-family:inherit;">View</button>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════ STUDENT MODAL
+function openStudentModal(id){
+  const s=STUDENTS.find(x=>x.id===id);
+  if(!s) return;
+  document.getElementById('modal-name').textContent=s.name;
+  document.getElementById('modal-roll').textContent=s.roll+' · '+s.subject;
+  document.getElementById('modal-body').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+      ${[{l:'SDL Readiness',v:s.sdl+'%',c:sdlColor(s.sdl),bg:s.sdl>=70?'#F0FDFA':s.sdl>=50?'#FFFBEB':'#FFF1F2',bd:s.sdl>=70?'#99F6E4':s.sdl>=50?'#FDE68A':'#FECACA'},{l:'Quiz Average',v:s.quizAvg+'%',c:'#7C3AED',bg:'#F5F3FF',bd:'#DDD6FE'},{l:'Reflections',v:s.reflections,c:'#D97706',bg:'#FFFBEB',bd:'#FDE68A'}].map(m=>`
+      <div style="background:${m.bg};border:1px solid ${m.bd};border-radius:10px;padding:12px;text-align:center;">
+        <div style="font-size:10px;color:var(--text4);font-family:'DM Mono',monospace;font-weight:600;margin-bottom:5px;">${m.l.toUpperCase()}</div>
+        <div style="font-size:22px;font-weight:700;color:${m.c};">${m.v}</div>
+      </div>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;">
+        <div style="font-size:11px;color:var(--text4);font-family:'DM Mono',monospace;font-weight:600;margin-bottom:8px;">DOMAIN PROFILE</div>
+        <div style="font-size:13px;font-weight:600;color:${domainColor(s.domain)};margin-bottom:4px;">Primary: ${s.domain.toUpperCase()}</div>
+        <div style="font-size:13px;font-weight:500;color:${levelColor(s.level)};margin-bottom:4px;">Level: ${s.level}</div>
+        <div style="font-size:13px;font-weight:500;color:${emotionColor(s.emotional)};">Mood: ${emotionEmoji(s.emotional)} ${s.emotional}</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;">
+        <div style="font-size:11px;color:var(--text4);font-family:'DM Mono',monospace;font-weight:600;margin-bottom:8px;">PROGRESS TREND</div>
+        <canvas id="modal-trend-chart" height="60"></canvas>
+      </div>
+    </div>
+    <div style="background:var(--red-light);border:1px solid var(--red-border);border-radius:10px;padding:14px;">
+      <div style="font-size:11px;color:var(--red);font-family:'DM Mono',monospace;font-weight:600;margin-bottom:8px;">IDENTIFIED GAPS</div>
+      ${s.gaps.map(g=>`<div style="font-size:13px;color:var(--text2);margin-bottom:4px;padding-left:8px;border-left:2px solid var(--red);">${g}</div>`).join('')}
+    </div>`;
+  document.getElementById('student-modal').classList.add('open');
+  setTimeout(()=>{
+    new Chart(document.getElementById('modal-trend-chart'),{
+      type:'line',
+      data:{labels:['W1','W2','W3','W4'],datasets:[{data:s.trend,borderColor:'#0D9488',tension:.4,pointRadius:3,borderWidth:2,fill:false}]},
+      options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#94A3B8',font:{size:10}}},y:{grid:{display:false},ticks:{display:false}}}}
+    });
+  },50);
+}
+function closeModal(){ document.getElementById('student-modal').classList.remove('open'); }
+
+// ═══════════════════════════════════ AT-RISK
+function renderAtRisk(){
+  const ar=STUDENTS.filter(s=>s.sdl<50);
+  document.getElementById('at-risk-cards').innerHTML=ar.map(s=>`
+    <div class="at-risk-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);">${s.name}</div>
+          <div style="font-size:11px;color:var(--text4);font-family:'DM Mono',monospace;">${s.roll} · ${s.subject}</div>
+        </div>
+        <div style="font-size:22px;font-weight:700;color:var(--red);font-family:'DM Mono',monospace;">${s.sdl}%</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+        <span class="badge" style="color:${domainColor(s.domain)};background:${domainColor(s.domain)}18;">${s.domain}</span>
+        <span class="badge" style="color:${levelColor(s.level)};background:${levelColor(s.level)}18;">${s.level}</span>
+        <span class="badge" style="color:${emotionColor(s.emotional)};background:${emotionColor(s.emotional)}18;">${emotionEmoji(s.emotional)} ${s.emotional}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">Gaps: ${s.gaps.join(' · ')}</div>
+      <div style="display:flex;gap:6px;">
+        <button style="flex:1;padding:6px 0;text-align:center;background:var(--red-light);border:1px solid var(--red-border);border-radius:6px;color:var(--red);font-size:12px;cursor:pointer;font-weight:500;font-family:inherit;">Notify Student</button>
+        <button style="flex:1;padding:6px 0;text-align:center;background:var(--violet-light);border:1px solid var(--violet-border);border-radius:6px;color:var(--violet);font-size:12px;cursor:pointer;font-weight:500;font-family:inherit;">Schedule Review</button>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════ INSIGHTS CHARTS
+let insightsCharsInit=false;
+function initInsightsCharts(){
+  if(insightsCharsInit) return; insightsCharsInit=true;
+  // Domain pie
+  const domainCounts=[
+    STUDENTS.filter(s=>s.domain==='knowledge').length,
+    STUDENTS.filter(s=>s.domain==='skill').length,
+    STUDENTS.filter(s=>s.domain==='attitude').length,
+  ];
+  new Chart(document.getElementById('domainPieChart'),{
+    type:'pie',
+    data:{labels:['Knowledge','Skill','Attitude'],datasets:[{data:domainCounts,backgroundColor:['#0D9488','#D97706','#7C3AED'],borderWidth:0}]},
+    options:{responsive:true,plugins:{legend:{labels:{font:{family:'DM Sans',size:12},color:'#64748B'}}}}
+  });
+  // SDL bar
+  new Chart(document.getElementById('sdlBarChart'),{
+    type:'bar',
+    data:{labels:STUDENTS.map(s=>s.name.split(' ')[0]),datasets:[{data:STUDENTS.map(s=>s.sdl),backgroundColor:STUDENTS.map(s=>sdlColor(s.sdl)),borderRadius:4}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#94A3B8',font:{family:'DM Mono',size:10}}},y:{grid:{color:'#F1F5F9'},ticks:{color:'#94A3B8',font:{family:'DM Mono',size:10}},max:100}}}
+  });
+  // Pyramid
+  const levels=['Knows','Knows How','Shows How','Does'];
+  new Chart(document.getElementById('pyramidChart'),{
+    type:'bar',
+    data:{labels:levels,datasets:[{data:levels.map(l=>STUDENTS.filter(s=>s.level===l).length),backgroundColor:levels.map(l=>levelColor(l)),borderRadius:4}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#64748B',font:{family:'DM Sans',size:11}}},y:{grid:{color:'#F1F5F9'},ticks:{color:'#94A3B8',font:{family:'DM Mono',size:10}},stepSize:1}}}
+  });
+  // Emotional
+  const emotions=['confident','motivated','anxious','frustrated','confused'];
+  document.getElementById('emotion-grid').innerHTML=emotions.map(e=>{
+    const cnt=STUDENTS.filter(s=>s.emotional===e).length;
+    if(!cnt) return '';
+    const c=emotionColor(e);
+    return `<div class="emotion-card" style="background:${c}0F;border-color:${c}33;">
+      <div class="emotion-emoji">${emotionEmoji(e)}</div>
+      <div class="emotion-count" style="color:${c};">${cnt}</div>
+      <div class="emotion-label">${e}</div>
+    </div>`;
+  }).join('');
+}
+let adminChartsInit=false;
+function initAdminCharts(){ if(!adminChartsInit){ adminChartsInit=true; renderStudentTable(); renderAtRisk(); } }
+
+// ═══════════════════════════════════ API CALL
+async function callClaude(messages, system=''){
+  const body={model:"claude-sonnet-4-20250514",max_tokens:1000,messages};
+  if(system) body.system=system;
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)
+  });
+  const d=await res.json();
+  return d.content[0].text;
+}
+
+// ═══════════════════════════════════ REFLECTION ANALYSIS
+function setSample(i){ document.getElementById('reflection-input').value=SAMPLES[i]; }
+async function analyzeReflection(){
+  const reflection=document.getElementById('reflection-input').value.trim();
+  if(!reflection) return;
+  const subject=document.getElementById('subject-select').value;
+  const level=document.getElementById('level-select').value;
+  document.getElementById('analysis-loading').style.display='block';
+  document.getElementById('analysis-result').style.display='none';
+  document.getElementById('analyze-btn').disabled=true;
+  try{
+    const txt=await callClaude([{role:"user",content:`You are an NMC medical education evaluator. A student submitted: "${reflection}". Subject: ${subject}. Level: ${level}. Respond ONLY in valid JSON:\n{"primaryDomain":"knowledge|skill|attitude","domainBreakdown":{"knowledge":0-100,"skill":0-100,"attitude":0-100},"actualCompetencyLevel":"Knows|Knows How|Shows How|Does","gaps":["g1","g2","g3"],"strengths":["s1","s2"],"emotionalTone":"confident|anxious|frustrated|motivated|confused","sdlReadiness":0-100,"immediateActions":["a1","a2","a3"],"reflectionQuality":"superficial|descriptive|analytical|critical","encouragement":"one sentence"}`}]);
+    analysisData=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    renderAnalysis(analysisData);
+  }catch(e){ alert('Analysis failed. Please try again.'); }
+  document.getElementById('analysis-loading').style.display='none';
+  document.getElementById('analyze-btn').disabled=false;
+}
+function renderAnalysis(a){
+  const domains=[{id:'knowledge',label:'Knowledge',icon:'📚',color:'#0D9488'},{id:'skill',label:'Skills',icon:'⚕️',color:'#D97706'},{id:'attitude',label:'Attitude',icon:'🤝',color:'#7C3AED'}];
+  const sdlReadiness=a.sdlReadiness||0;
+  const sdlC=sdlReadiness>=70?'var(--teal)':sdlReadiness>=50?'var(--amber)':'var(--red)';
+  const sdlBg=sdlReadiness>=70?'var(--teal-light)':sdlReadiness>=50?'var(--amber-light)':'var(--red-light)';
+  const sdlBd=sdlReadiness>=70?'var(--teal-border)':sdlReadiness>=50?'var(--amber-border)':'var(--red-border)';
+  const dc=domainColor(a.primaryDomain);
+  document.getElementById('analysis-result').innerHTML=`
+    <div class="card" style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:15px;font-weight:700;color:var(--text);">Domain Analysis</div>
+        <span class="badge" style="color:${dc};background:${dc}18;border:1px solid ${dc}44;">Primary: ${(a.primaryDomain||'').toUpperCase()}</span>
+      </div>
+      ${domains.map(d=>`
+        <div class="analysis-domain-bar">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:12px;color:var(--text2);">${d.icon} ${d.label}</span>
+            <span style="font-size:12px;font-weight:700;color:${d.color};font-family:'DM Mono',monospace;">${(a.domainBreakdown||{})[d.id]||0}%</span>
+          </div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${(a.domainBreakdown||{})[d.id]||0}%;background:${d.color};"></div></div>
+        </div>`).join('')}
+    </div>
+    <div class="meta-grid">
+      <div class="meta-card" style="background:var(--teal-light);border:1px solid var(--teal-border);">
+        <div class="meta-card-label">COMPETENCY LEVEL</div>
+        <div class="meta-card-value" style="color:var(--teal);">${a.actualCompetencyLevel||''}</div>
+      </div>
+      <div class="meta-card" style="background:${sdlBg};border:1px solid ${sdlBd};">
+        <div class="meta-card-label">SDL READINESS</div>
+        <div class="meta-card-value" style="color:${sdlC};">${sdlReadiness}%</div>
+      </div>
+      <div class="meta-card" style="background:var(--violet-light);border:1px solid var(--violet-border);">
+        <div class="meta-card-label">REFLECTION QUALITY</div>
+        <div class="meta-card-value" style="color:var(--violet);">${a.reflectionQuality||''}</div>
+      </div>
+    </div>
+    <div class="gap-strength-grid">
+      <div style="background:var(--red-light);border:1px solid var(--red-border);border-radius:10px;padding:13px;">
+        <div style="font-size:10px;color:var(--red);font-family:'DM Mono',monospace;font-weight:600;margin-bottom:7px;">▲ GAPS</div>
+        ${(a.gaps||[]).map(g=>`<div class="gap-item" style="border-left:2px solid var(--red);">${g}</div>`).join('')}
+      </div>
+      <div style="background:var(--teal-light);border:1px solid var(--teal-border);border-radius:10px;padding:13px;">
+        <div style="font-size:10px;color:var(--teal);font-family:'DM Mono',monospace;font-weight:600;margin-bottom:7px;">✦ STRENGTHS</div>
+        ${(a.strengths||[]).map(s=>`<div class="strength-item" style="border-left:2px solid var(--teal);">${s}</div>`).join('')}
+      </div>
+    </div>
+    <div style="background:var(--blue-light);border:1px solid var(--blue-border);border-radius:10px;padding:13px 15px;margin-bottom:14px;font-size:13px;color:var(--blue);font-style:italic;line-height:1.6;">
+      💬 ${a.encouragement||''}
+    </div>
+    <div style="display:flex;gap:9px;flex-wrap:wrap;">
+      <button class="btn btn-violet" onclick="generateRoadmap()">Generate 4-Week Roadmap →</button>
+    </div>`;
+  document.getElementById('analysis-result').style.display='block';
+}
+
+// ═══════════════════════════════════ ROADMAP
+async function generateRoadmap(){
+  if(!analysisData) return;
+  const subject=document.getElementById('subject-select').value;
+  document.getElementById('roadmap-loading').style.display='block';
+  document.getElementById('roadmap-empty').style.display='none';
+  document.getElementById('roadmap-content').style.display='none';
+  showStudentPanel('roadmap',document.querySelectorAll('.std-tab')[1]);
+  try{
+    const txt=await callClaude([{role:"user",content:`Create a 4-week roadmap for ${subject} student. Gaps: ${(analysisData.gaps||[]).join(',')}. Level: ${analysisData.actualCompetencyLevel}. Respond ONLY in valid JSON:\n{"title":"title","weeks":[{"week":1,"theme":"theme","goal":"goal","activities":[{"type":"reading|video|practice|discussion|clinical","task":"task","duration":"time"}],"milestone":"milestone"}],"assessmentStrategy":"strategy"}`}]);
+    const rm=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    renderRoadmap(rm);
+  }catch(e){ alert('Roadmap generation failed.'); }
+  document.getElementById('roadmap-loading').style.display='none';
+}
+function renderRoadmap(rm){
+  const wColors=[{c:'#0D9488',bg:'#F0FDFA',bd:'#99F6E4'},{c:'#D97706',bg:'#FFFBEB',bd:'#FDE68A'},{c:'#7C3AED',bg:'#F5F3FF',bd:'#DDD6FE'},{c:'#059669',bg:'#ECFDF5',bd:'#A7F3D0'}];
+  const actIcon={reading:'📖',video:'🎬',practice:'✍️',clinical:'🏥',discussion:'💬'};
+  document.getElementById('roadmap-content').innerHTML=`
+    <div style="background:var(--violet-light);border:1px solid var(--violet-border);border-radius:10px;padding:14px 18px;margin-bottom:18px;">
+      <h3 style="font-size:16px;color:var(--violet);margin-bottom:3px;font-weight:700;">${rm.title}</h3>
+      <p style="font-size:12px;color:var(--text3);">${rm.assessmentStrategy}</p>
+    </div>
+    <div class="roadmap-grid">
+      ${(rm.weeks||[]).map((week,i)=>{
+        const w=wColors[i%4];
+        return `<div class="week-card" style="background:${w.bg};border-color:${w.bd};border-top-color:${w.c};">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:10px;color:${w.c};font-family:'DM Mono',monospace;font-weight:700;">WEEK ${week.week}</span>
+            <span style="font-size:11px;color:var(--text3);background:#fff;padding:2px 8px;border-radius:8px;border:1px solid var(--border);">${week.theme}</span>
+          </div>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5;font-weight:500;">${week.goal}</p>
+          ${(week.activities||[]).map(act=>`
+            <div style="display:flex;gap:7px;margin-bottom:5px;">
+              <span style="font-size:11px;">${actIcon[act.type]||'•'}</span>
+              <span style="font-size:11px;color:var(--text2);">${act.task} <span style="color:var(--text4);">· ${act.duration}</span></span>
+            </div>`).join('')}
+          <div style="margin-top:10px;padding:7px 10px;background:#fff;border-radius:6px;font-size:11px;color:${w.c};font-weight:600;border:1px solid ${w.bd};">🏆 ${week.milestone}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  document.getElementById('roadmap-content').style.display='block';
+}
+
+// ═══════════════════════════════════ QUIZ
+async function generateQuiz(){
+  const subject=document.getElementById('subject-select').value;
+  const level=document.getElementById('level-select').value;
+  showStudentPanel('quiz',document.querySelectorAll('.std-tab')[2]);
+  document.getElementById('quiz-empty').style.display='none';
+  document.getElementById('quiz-loading').style.display='block';
+  document.getElementById('quiz-content').style.display='none';
+  document.getElementById('quiz-submit-row').style.display='none';
+  document.getElementById('quiz-score').style.display='none';
+  quizAnswers={}; quizSubmitted=false;
+  try{
+    const txt=await callClaude([{role:"user",content:`Create 5 NMC-style MCQs for ${subject} at "${level}" level. Respond ONLY in valid JSON:\n{"questions":[{"id":1,"domain":"knowledge|skill|attitude","question":"q","options":{"A":"","B":"","C":"","D":""},"correct":"A|B|C|D","explanation":"brief"}]}`}]);
+    const data=JSON.parse(txt.replace(/```json|```/g,'').trim());
+    quizQuestions=data.questions||[];
+    renderQuiz();
+  }catch(e){ alert('Quiz generation failed.'); }
+  document.getElementById('quiz-loading').style.display='none';
+}
+function renderQuiz(){
+  document.getElementById('quiz-content').innerHTML=quizQuestions.map((q,i)=>`
+    <div class="quiz-q fade-up" id="quiz-q-${q.id}">
+      <div style="display:flex;gap:9px;margin-bottom:2px;">
+        <span class="badge" style="color:${domainColor(q.domain)};background:${domainColor(q.domain)}18;font-size:10px;flex-shrink:0;">${(q.domain||'').toUpperCase()}</span>
+        <span style="font-size:13px;color:var(--text2);font-weight:500;line-height:1.6;">Q${i+1}. ${q.question}</span>
+      </div>
+      <div class="quiz-options">
+        ${Object.entries(q.options||{}).map(([k,v])=>`
+          <button class="quiz-option" id="opt-${q.id}-${k}" onclick="selectOption(${q.id},'${k}')">
+            <span class="quiz-key">${k}.</span>${v}
+          </button>`).join('')}
+      </div>
+      <div id="expl-${q.id}" style="display:none;margin-top:10px;padding:10px 12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:7px;font-size:11px;color:#166534;">
+        <strong>Explanation:</strong> ${q.explanation||''}
+      </div>
+    </div>`).join('');
+  document.getElementById('quiz-content').style.display='block';
+  document.getElementById('quiz-submit-row').style.display='block';
+  document.getElementById('quiz-subtitle').textContent='Miller\'s Level: '+document.getElementById('level-select').value;
+}
+function selectOption(qId,key){
+  if(quizSubmitted) return;
+  quizAnswers[qId]=key;
+  const q=quizQuestions.find(x=>x.id===qId);
+  if(!q) return;
+  Object.keys(q.options).forEach(k=>{
+    const btn=document.getElementById('opt-'+qId+'-'+k);
+    btn.className='quiz-option'+(k===key?' selected':'');
+  });
+  const all=quizQuestions.every(q=>quizAnswers[q.id]);
+  document.querySelector('#quiz-submit-row button').disabled=!all;
+}
+function submitQuiz(){
+  quizSubmitted=true;
+  quizQuestions.forEach(q=>{
+    const chosen=quizAnswers[q.id];
+    Object.keys(q.options).forEach(k=>{
+      const btn=document.getElementById('opt-'+q.id+'-'+k);
+      btn.className='quiz-option'+(k===q.correct?'correct':k===chosen&&k!==q.correct?'wrong':'');
+      btn.disabled=true;
+    });
+    document.getElementById('expl-'+q.id).style.display='block';
+  });
+  const score=quizQuestions.filter(q=>quizAnswers[q.id]===q.correct).length;
+  document.getElementById('quiz-submit-row').style.display='none';
+  document.getElementById('quiz-score').innerHTML=`
+    <div style="background:var(--teal-light);border:1px solid var(--teal-border);border-radius:12px;padding:22px;text-align:center;margin-top:14px;" class="fade-up">
+      <div style="font-size:32px;margin-bottom:8px;">${score>=4?'🏆':'📚'}</div>
+      <div style="font-size:28px;font-weight:700;color:var(--teal);">${score}/${quizQuestions.length}</div>
+      <div style="font-size:13px;color:var(--text3);margin-top:4px;">${Math.round(score/quizQuestions.length*100)}% Score</div>
+    </div>`;
+  document.getElementById('quiz-score').style.display='block';
+}
+
+// ═══════════════════════════════════ CHAT TUTOR
+function initTutorChat(){
+  renderChat();
+}
+function renderChat(){
+  const box=document.getElementById('chat-messages');
+  box.innerHTML=chatHistory.map(m=>`
+    <div class="chat-msg ${m.role==='user'?'user':''}">
+      ${m.role==='assistant'?`<div class="bot-avatar">⚕</div>`:''}
+      <div class="chat-bubble ${m.role==='assistant'?'bot':'user-msg'}">${m.content}</div>
+    </div>`).join('');
+  box.scrollTop=box.scrollHeight;
+}
+function setChatInput(t){ document.getElementById('chat-input').value=t; }
+async function sendChat(){
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim();
+  if(!text) return;
+  chatHistory.push({role:'user',content:text});
+  input.value='';
+  renderChat();
+  const subject=document.getElementById('subject-select').value;
+  // Typing indicator
+  chatHistory.push({role:'assistant',content:'···'});
+  renderChat();
+  try{
+    const reply=await callClaude(
+      chatHistory.slice(0,-1).map(m=>({role:m.role,content:m.content})),
+      `You are an NMC medical education AI tutor for Indian MBBS students. Current subject: ${subject}. Be warm, precise, and clinically relevant.`
+    );
+    chatHistory[chatHistory.length-1]={role:'assistant',content:reply};
+  }catch(e){ chatHistory[chatHistory.length-1]={role:'assistant',content:'Sorry, I encountered an error. Please try again.'}; }
+  renderChat();
+}
+
+// ═══════════════════════════════════ CLASS INSIGHT
+async function generateClassInsight(){
+  const btn=document.querySelector('#admin-insights .btn-violet');
+  btn.disabled=true; btn.textContent='Analyzing...';
+  document.getElementById('insight-loading').style.display='block';
+  document.getElementById('insight-result').innerHTML='';
+  const summary=STUDENTS.map(s=>`${s.name}: SDL ${s.sdl}%, primary gap in ${s.domain}, level ${s.level}, emotional: ${s.emotional}`).join('\n');
+  try{
+    const txt=await callClaude([{role:'user',content:`You are an NMC medical education analyst. Here is a summary of 8 MBBS students' competency data:\n${summary}\n\nGenerate a concise class-level pedagogical insight report (4-5 sentences) covering: overall class readiness, dominant learning gaps, which domain needs most faculty attention, and 2 actionable recommendations for the faculty.`}]);
+    document.getElementById('insight-result').innerHTML=`<span style="color:var(--text2);">${txt}</span>`;
+  }catch(e){ document.getElementById('insight-result').innerHTML='<span style="color:var(--red);">Failed to generate insight.</span>'; }
+  document.getElementById('insight-loading').style.display='none';
+  btn.disabled=false; btn.textContent='Generate Insight';
+}
+
+// ═══════════════════════════════════ INIT
+initDashboardCharts();
+
+// Keep student page layout correct
+document.querySelectorAll('.nav-tab').forEach((btn,i)=>{
+  btn.addEventListener('click',()=>{
+    const pages=['dashboard','student','admin'];
+    showPage(pages[i]);
+  });
+});
+</script>
+</body>
+</html>
