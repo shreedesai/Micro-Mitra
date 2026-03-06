@@ -1210,6 +1210,29 @@ document.querySelectorAll('.nav-tab').forEach((btn,i)=>{
     showPage(pages[i]);
   });
 });
+initDashboardCharts();
+
+function loginStudent(){
+
+let student = {
+  student_id: document.getElementById("student_id").value,
+  name: document.getElementById("name").value,
+  roll: document.getElementById("roll").value,
+  batch: document.getElementById("batch").value,
+  email: document.getElementById("email").value
+};
+
+localStorage.setItem("micromitra_student", JSON.stringify(student));
+
+document.getElementById("login-page").style.display="none";
+document.getElementById("app").style.display="block";
+
+}
+
+</script>
+</body>
+</html>
+  
 </script>
 </body>
 </html>
